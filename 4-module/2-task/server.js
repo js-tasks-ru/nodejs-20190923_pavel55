@@ -7,8 +7,8 @@ const writeFile = require('./writeFile');
 const server = new http.Server();
 server.on('request', (req, res) => {
 
-    const pathName = url.parse(req.url).pathname.slice(1);
-    const filePath = path.join(__dirname, 'files', pathName);
+    const pathname = url.parse(req.url).pathname.slice(1);
+    const filePath = path.join(__dirname, 'files', pathname);
     
     const urlArr = req.url.split('/');
     
@@ -26,7 +26,6 @@ server.on('request', (req, res) => {
             writeFile(filePath, req, res);
             break;
         default:
-            //fs.unlink(filepath, ()=>{});
             res.statusCode = 501;
             res.end('Not implemented');
     }
