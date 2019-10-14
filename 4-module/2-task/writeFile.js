@@ -15,6 +15,7 @@ module.exports = function writeFile( filepath, req, res ){
         if (err) {
             res.statusCode = 413;
             res.end('more than max limit');
+            return;
         } 
     });
 
@@ -29,7 +30,9 @@ module.exports = function writeFile( filepath, req, res ){
         }
     }).on('close', (err, data) => {
         if(err){
-            //fs.unlink(filepath, ()=>{});
+            fs.unlink(filepath, ()=>{});
+            res.end('success');
+            return;
         } else {
             res.statusCode = 201;
             res.end('success');
