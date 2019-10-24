@@ -8,8 +8,6 @@ module.exports.productsByQuery = async function productsByQuery(ctx, next) {
 
     productModel.on('index', function(error) {
       if (error) {
-        console.log('index ERROR!!');
-        console.dir(error);
       }
     });
 

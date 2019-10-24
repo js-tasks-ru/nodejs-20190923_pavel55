@@ -1,9 +1,9 @@
 const Category = require('../models/Category');
-const { formatResponse } = require('../libs/formatResponse');
+const mapCategory = require('../mappers/category');
 
 module.exports.categoryList = async function categoryList(ctx, next) {
-  const response = await Category.find();
-  const categoryList = response.map((model) => {
+  const categories = await Category.find();
+  ctx.body = {categories: categories.map(mapCategory)};
     model = formatResponse(model._doc);
     model.subcategories = model.subcategories.map((subcategory) => {
       return formatResponse(subcategory._doc);

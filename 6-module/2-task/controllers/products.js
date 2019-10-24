@@ -1,15 +1,15 @@
-const {formatResponse} = require('./../libs/formatResponse');
-const mongoose = require('mongoose');
 const Product = require('../models/Product');
-const Category = require('../models/Category');
+const mongoose = require('mongoose');
+const mapProduct = require('../mappers/product');
+
 
 module.exports.productsBySubcategory = async function productsBySubcategory(ctx, next) {
-  try {
+  const {subcategory} = ctx.query;
 
-    let category = await Category.create({
-      title: 'Category2',
-      subcategories: [{
-        title: 'Subcategory2',
+  if (!subcategory) return next();
+
+  const products = await Product.find({subcategory: subcategory}).limit(20);
+  ctx.body = {products: products.map(mapProduct)};
       }],
     });
 
@@ -32,12 +32,23 @@ module.exports.productsBySubcategory = async function productsBySubcategory(ctx,
 };
 
 module.exports.productList = async function productList(ctx, next) {
-  //Подтягиваем данные из предыдущего стрима и передаем в следующий
-  const {productsList} = ctx;
+  const products = await Product.find().limit(20);
+  ctx.body = {products: products.map(mapProduct)};
   ctx.body = {products: productsList.map((product) => formatResponse(product._doc))};
 };
 
 module.exports.productById = async function productById(ctx, next) {
+  if (!mongoose.Types.ObjectId.isValid(ctx.params.id)) {
+    ctx.throw(400, 'invalid product id');
+  }
+
+  const product = await Product.findById(ctx.params.id);
+
+  if (!product) {
+    ctx.throw(404, `no product with ${ctx.params.id} id`);
+  }
+
+  ctx.body = {product: mapProduct(product)};
   
   const {id} = ctx.params;
   try {
