@@ -8,6 +8,7 @@ module.exports.productsByQuery = async function productsByQuery(ctx, next) {
 
     productModel.on('index', function(error) {
       if (error) {
+        throw error;
       }
     });
 
@@ -19,8 +20,8 @@ module.exports.productsByQuery = async function productsByQuery(ctx, next) {
     });
 
     ctx.status = 200;
-    ctx.body = {products: [...productList]};
-  } catch (err) {
+    ctx.body = { products: [...productList] };
+  } catch (err) { 
     productModel.db.close();
 
     ctx.status = 500;

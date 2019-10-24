@@ -2,33 +2,18 @@ const Product = require('../models/Product');
 const mongoose = require('mongoose');
 const mapProduct = require('../mappers/product');
 
-
 module.exports.productsBySubcategory = async function productsBySubcategory(ctx, next) {
   const {subcategory} = ctx.query;
 
   if (!subcategory) return next();
 
-  const products = await Product.find({subcategory: subcategory}).limit(20);
-  ctx.body = {products: products.map(mapProduct)};
-      }],
-    });
-
-    let product = await Product.create({
-      title: 'Product2',
-      description: 'Description2',
-      price: 10,
-      category: category.id,
-      subcategory: category.subcategories[0].id,
-      images: ['image1'],
-    });
+    const products = await Product.find({subcategory: subcategory}).limit(20);
+    ctx.body = {products: products.map(mapProduct)};
 
     //Пытаемся передать данные в следующий стрим
     const productsArr = await Product.find();
     ctx.productsList = productsArr;
     await next(); 
-  } catch(err) {
-    throw err;
-  }
 };
 
 module.exports.productList = async function productList(ctx, next) {
