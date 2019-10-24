@@ -1,7 +1,25 @@
-const Category = require('../models/Category');
+const {formatResponse} = require('./../libs/formatResponse');
 
 module.exports.categoryList = async function categoryList(ctx, next) {
-  
-  const categoriesArr = await Category.find();
-  ctx.body = {categories : categoriesArr};
+  let Category;
+
+  try {
+    Category = await require('./../models/Category');
+    const resp = await Category.find();
+
+    const categoryList = resp.map((model) => {
+      newModel = formatResponse(model._doc);
+
+      newModel.subcategories = newModel.subcategories.map((subcategory) => {
+        return formatResponse(subcategory._doc);
+      });
+
+      return newModel;
+    });
+
+    ctx.body = {categories: categoryList};
+  } catch (err) {
+    await Category.db.close();
+    throw err;
+  }
 };
