@@ -1,60 +1,57 @@
-const {formatResponse} = require('./../libs/formatResponse');
 const mongoose = require('mongoose');
+const Product = require('../models/Product');
+const Category = require('../models/Category');
+const formatResponse = require('../libs/formatResponse');
 
 module.exports.productsBySubcategory = async function productsBySubcategory(ctx, next) {
-  const {subcategory} = ctx.request.query;
+  const {subcategory} = ctx.query;
 
-  if (!subcategory || subcategory.length === 0) return;
-
-  let bdModel = {};
-
-  try {
-    bdModel = await require('./../models/Product');
-
-    ctx.productsList = await bdModel.find({subcategory});
-
-    await next();
-  } catch (err) {
-    await bdModel.db.close();
-    throw err;
+  if (!subcategory) {
+    return next();
   }
+
+  if (!mongoose.Types.ObjectId.isValid(subcategory)) {
+    ctx.throw(400, 'invalid subcategory id');
+  }
+
+  const products = await Product.find({subcategory}).limit(20);
+  ctx.body = {products: formatResponse(products)};
 };
 
 module.exports.productList = async function productList(ctx, next) {
-  const {productsList} = ctx;
-  ctx.body = {products: productsList.map((product) => formatResponse(product._doc))};
+  const products = await Product.find().limit(20);
+  ctx.body = {products: formatResponse(products)};
 };
 
 module.exports.productById = async function productById(ctx, next) {
   const {id} = ctx.params;
-
-  try {
-    new mongoose.Types.ObjectId(id);
-  } catch (err) {
-    ctx.status = 400;
-    ctx.body = 'Bad id';
-    return;
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    ctx.throw(400, 'invalid product id');
   }
 
-  let bdModel = {};
-  let resp = {};
+  const product = await Product.findById(id);
 
-  try {
-    bdModel = await require('./../models/Product');
-    resp = await bdModel.findById(id);
-  } catch (err) {
-    await bdModel.db.close();
-    throw err;
+  if (!product) {
+    ctx.throw(404, `no product with ${ctx.params.id} id`);
   }
 
-  if (!resp) {
-    ctx.status = 404;
-    ctx.body = 'Product not found!';
+  ctx.body = {product: mapProduct(product)};
+};
 
-    return;
-  }
+module.exports.productAdd = async function categoryAdd(ctx, next) {
+  const productNum = Math.floor(Math.random() * 100000);
+  const categories = await Category.find();
+  const idx = Math.floor(Math.random() * categories.length);
+  const category = categories[idx];
 
-  ctx.body = {product: formatResponse(resp._doc)};
+  const product = await Product.create({
+    title: `product ${productNum}`,
+    description: `description of product ${productNum}`,
+    price: (productNum / 1000).toFixed(2),
+    category: category._id,
+    subcategory: category.subcategories[0]._id,
+    images: new Array(idx + 2).fill(`image-${Math.random()}`),
+  });
 
-  await next();
+  ctx.body = product;
 };
