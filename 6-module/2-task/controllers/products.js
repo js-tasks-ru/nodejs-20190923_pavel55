@@ -7,19 +7,13 @@ module.exports.productsBySubcategory = async function productsBySubcategory(ctx,
 
   if (!subcategory) return next();
 
-    const products = await Product.find({subcategory: subcategory}).limit(20);
-    ctx.body = {products: products.map(mapProduct)};
-
-    //Пытаемся передать данные в следующий стрим
-    const productsArr = await Product.find();
-    ctx.productsList = productsArr;
-    await next(); 
+  const products = await Product.find({subcategory: subcategory}).limit(20);
+  ctx.body = {products: products.map(mapProduct)};
 };
 
 module.exports.productList = async function productList(ctx, next) {
   const products = await Product.find().limit(20);
   ctx.body = {products: products.map(mapProduct)};
-  ctx.body = {products: productsList.map((product) => formatResponse(product._doc))};
 };
 
 module.exports.productById = async function productById(ctx, next) {
@@ -34,26 +28,4 @@ module.exports.productById = async function productById(ctx, next) {
   }
 
   ctx.body = {product: mapProduct(product)};
-  
-  const {id} = ctx.params;
-  try {
-    new mongoose.Types.ObjectId(id);
-  } catch (err) {
-    ctx.status = 400;
-    ctx.body = 'Bad id';
-    return;
-  }
-
-  let productElem = await Product.findById(id);
-
-  if (!productElem) {
-    ctx.status = 404;
-    ctx.body = 'Product not found!';
-    return;
-  }
-  
-  productElem = formatResponse(productElem._doc);
-  ctx.body = { product : formatResponse(productElem) };
-
-  await next();
 };

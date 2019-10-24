@@ -4,24 +4,18 @@ const {productsBySubcategory, productList, productById} = require('./controllers
 const {categoryList} = require('./controllers/categories');
 
 const app = new Koa();
-app.use(require('koa-bodyparser')());
 
 app.use(async (ctx, next) => {
   try {
     await next();
-  } catch(err) {
+  } catch (err) {
     if (err.status) {
       ctx.status = err.status;
-      ctx.body = err.message;
-      return;
-    }
-    if (err.name === 'ValidationError') {
-      ctx.status = 400;
-      ctx.body = Object.keys(err.errors).map(key => ({ [key]: err.errors[key].message }));
+      ctx.body = {error: err.message};
     } else {
-      ctx.status = 500;
-      ctx.body = 'Internal server error';
       console.error(err);
+      ctx.status = 500;
+      ctx.body = {error: 'Internal server error'};
     }
   }
 });
