@@ -41,4 +41,7 @@ productSchema.index(
     }
 );
 
+  default_language: 'russian',
+});
+
 module.exports = connection.model('Product', productSchema);

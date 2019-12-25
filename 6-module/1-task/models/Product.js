@@ -32,4 +32,4 @@ const productSchema = new mongoose.Schema({
 
 });
 
-module.exports = connection.model('Product', productSchema);
+module.exports = connection.model('Product', schema);

@@ -20,5 +20,12 @@ module.exports = new LocalStrategy(
       } catch (err) {
         done(err);
       }
+
+      if (!await user.checkPassword(password)) {
+        done(null, false, 'Неверный пароль');
+        return;
+      }
+
+      done(null, user);
     }
 );
